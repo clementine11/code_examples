@@ -3,7 +3,7 @@
 from string import punctuation as punct
 import csv
 
-print '''This class uses (and slightly expands) Open Refine's 'fingerprint' functionality to merge similar row names in a csv file on a per-column basis. 
+'''This class uses (and slightly expands) Open Refine's 'fingerprint' functionality to merge similar row names in a csv file on a per-column basis. 
 \nTo use this module:
 \n\nFirst you must create a class by typing (Your classname here)= Refine(your csvfilepath) with the optional arguments 'delimiter' and 'lineterminator' 
 to tell Python how to interpret the CSV.\nYou access individual columns by using 'classname.(columnname goes here)' syntax. 
