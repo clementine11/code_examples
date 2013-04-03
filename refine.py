@@ -9,19 +9,21 @@ csv file on a per-column basis.
 
 To use this module:
 
-First create a class by typing *Your classname here*= Refine(*your csvfilepath*) with the optional additional 
-arguments 'dialect', delimiter' and 'lineterminator' to tell Python how to interpret the CSV. You access individual columns by
-using *your classname*.(*columnname goes here*) syntax.
+First create a class by typing classname = Refine(csvfilepath) with the optional additional 
+arguments 'dialect', delimiter' and 'lineterminator' to tell Python how to interpret the CSV. You access individual 
+columns by using classname.columnname syntax.
 
 NOTE: This module assumes the first row is a row of column names! If you don't have any names, this won't work. 
 
-If you want to standardize a column of names, you can run classname.namefix(classname.columnname) and all identical names will be
-made to have consistent formatting. If you are working  with person names, and set the optional parameter lastnamefirst=True, the
-names will be returned in 'Lastname, First, Middle' format.
-If you want to make things even more standardized, you can then run classname.simfind(classname.columnname) to have the program suggest 
-words within one letter of similarity. You can either accept or reject these changes. Type the name of your class at any time to see what
-your updated table looks like (Columns will be printed as rows for ease of scanning). When you are happy with the changes, save them 
-directly to the file by typing classname.save() '''
+If you want to standardize a column of names, you can run classname.namefix(classname.columnname) and all 
+identical names will be made to have consistent formatting. If you are working  with person names, and set the 
+optional parameter lastnamefirst=True, the names will be returned in 'Lastname, First, Middle' format.
+If you want to make things even more standardized, you can then run classname.simfind(classname.columnname) to 
+have the program suggest words within one letter of similarity. You can either accept or reject these changes. 
+Type the name of your class at any time to see what your updated table looks like (Columns will be printed as 
+rows for ease of scanning).
+
+ When you are happy with the changes, save them  directly to the file by typing classname.save() '''
 
 class Column(object):
 	def __init__(self, columnlist, order):
