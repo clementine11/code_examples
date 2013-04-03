@@ -8,17 +8,16 @@ import csv
 \nTo use this module:
 \n\nFirst you must create a class by typing *Your classname here*= Refine(*your csvfilepath*) with the optional additional arguments 'dialect', delimiter' and 'lineterminator' 
 to tell Python how to interpret the CSV.\nYou access individual columns by using *your classname*.(*columnname goes here*) syntax. 
-NOTE: This module assumes the first row is a row of columnnames! If you don't have any names, this won't work.
+NOTE: This module assumes the first row is a row of column names! If you don't have any names, this won't work.
 If you want to standardize a column of names, you can run run classname.namefix(classname.columnname) and all identical names will be made to have
-with consistent formatting. If you set the optional parameter lastnamefirst=True, the names will be returned in 'Lastname, First, Middle' format.
-If you just want to standardize words in a column, classname.wordfix(classname.columnname) does the same thing for identical
-words. If you want to make things even more standardized, you can then run classname.simfind(classname.columnname) to have
-the program suggest words within one letter of similarity. You can either accept or reject these changes. Type the name of your class at any 
-time to see what your updated table looks like (Columns will be printed as rows for ease of scanning). When you are happy with the changes, save them directly to the file by typing classname.save() '''
+consistent formatting. If you are working with person names, and set the optional parameter lastnamefirst=True, the names will be returned in 'Lastname, First, Middle' format.
+If you want to make things even more standardized, you can then run classname.simfind(classname.columnname) to have the program suggest words within one 
+letter of similarity. You can either accept or reject these changes. Type the name of your class at any time to see what your updated table looks like
+(Columns will be printed as rows for ease of scanning). When you are happy with the changes, save them directly to the file by typing classname.save() '''
 
 class Column(object):
 	def __init__(self, columnlist, order):
-		self.columnlist=columnlist
+		self.columnlist=[x.strip() for x in columnlist]
 		self.order=order
 
 	def update(self, replacementdict):
@@ -48,7 +47,7 @@ class Refine(object):
 			self.clist=[]
 			for row in creader:
 				self.clist.append(row)
-			self.colnames=[x.strip() for x in self.clist[0]]
+			self.colnames=[x.replace(' ', '_').strip() for x in self.clist[0]]
 			list_of_column_objects=[]
 			for index, item in enumerate(self.colnames):
 				setattr(self, item, Column([x[index] for x in self.clist][1:], index))
@@ -72,31 +71,6 @@ class Refine(object):
 			print x, ":", y
 		return "end of table"
 			
-	def wordfix(self, colname):
-		keylist=[]
-		for d in colname:
-			fp=d.strip()
-			fp=fp.lower()
-			for p in punct:
-				fp=fp.replace(p, '')
-			fp=fp.split()
-			fp.sort()
-			fp=' '.join(fp)
-			kt=(fp, d)
-			keylist.append(kt)
-		namedict={}
-		for k in keylist:
-			namedict.setdefault(k[0], []).append(k[1])
-		rd=namedict.items()
-		print rd
-		replacementitems=[]
-		for x in namedict.items():
-			key=x[1][0]
-			key=key.title()
-			words=[(key, y) for y in x[1]]
-			replacementitems.extend(words)
-			replacementdict=dict(replacementitems)
-		colname.update(replacementdict)
 
 	def namefix(self, colname, lastnamefirst=False):
 		keylist=[]
@@ -169,7 +143,9 @@ class Refine(object):
 							if diffcount>1:
 								break
 					if x[1][-1]!=y[1][-1]:
-						diffcount+=1		
+						diffcount+=1	
+					if diffcount==0:
+						diffcount=1	
 					if diffcount==1:
 						print "If you agree, I will merge the following: ", reversenamedict[x[0]], 'and ', reversenamedict[y[0]]
 						ri=raw_input("Type 'y' to agree, 'n' to disagree: ")
@@ -186,7 +162,7 @@ class Refine(object):
 		with open(self.csvfile, 'wb') as newcsv:
 			newwriter=csv.writer(newcsv, dialect=self.dialect, delimiter=self.delimiter, lineterminator = self.lineterminator,  quoting=csv.QUOTE_MINIMAL)
 			columns=[]
-			newwriter.writerow(self.colnames)
+			newwriter.writerow([x.replace('_', ' ') for x in self.colnames])
 			for i, x in enumerate(self.colnames):
 				i= getattr(self, x)
 				columns.append(list(i))
@@ -194,3 +170,4 @@ class Refine(object):
 				row=[x[i] for x in columns]
 			for x in row:
 				newwriter.writerow(row)
+
