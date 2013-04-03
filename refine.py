@@ -3,15 +3,16 @@
 from string import punctuation as punct
 import csv
 
+
 '''This class uses (and slightly expands) Open Refine's 'fingerprint' functionality to merge similar row names in a csv file on a per-column basis. 
 \nTo use this module:
 \n\nFirst you must create a class by typing *Your classname here*= Refine(*your csvfilepath*) with the optional additional arguments 'dialect', delimiter' and 'lineterminator' 
 to tell Python how to interpret the CSV.\nYou access individual columns by using *your classname*.(*columnname goes here*) syntax. 
 NOTE: This module assumes the first row is a row of columnnames! If you don't have any names, this won't work.
-If you want to standardize a column of names, you can run run classname.standardizenames(classname.columnname) and all identical names will be made to have
+If you want to standardize a column of names, you can run run classname.namefix(classname.columnname) and all identical names will be made to have
 with consistent formatting. If you set the optional parameter lastnamefirst=True, the names will be returned in 'Lastname, First, Middle' format.
-If you just want to standardize words in a column, classname.standardizewords(classname.columnname) does the same thing for identical
-words. If you want to make things even more standardized, you can then run classname.similarityfinder(classname.columnname) to have
+If you just want to standardize words in a column, classname.wordfix(classname.columnname) does the same thing for identical
+words. If you want to make things even more standardized, you can then run classname.simfind(classname.columnname) to have
 the program suggest words within one letter of similarity. You can either accept or reject these changes. Type the name of your class at any 
 time to see what your updated table looks like (Columns will be printed as rows for ease of scanning). When you are happy with the changes, save them directly to the file by typing classname.save() '''
 
@@ -71,7 +72,7 @@ class Refine(object):
 			print x, ":", y
 		return "end of table"
 			
-	def standardizewords(self, colname):
+	def wordfix(self, colname):
 		keylist=[]
 		for d in colname:
 			fp=d.strip()
@@ -97,7 +98,7 @@ class Refine(object):
 			replacementdict=dict(replacementitems)
 		colname.update(replacementdict)
 
-	def standardizenames(self, colname, lastnamefirst=False):
+	def namefix(self, colname, lastnamefirst=False):
 		keylist=[]
 		for d in colname:
 			fp=d.strip()
@@ -133,7 +134,7 @@ class Refine(object):
 			replacementdict=dict(replacementitems)
 			colname.update(replacementdict)
 		
-	def similarityfinder(self, colname):
+	def simfind(self, colname):
 		keylist=[]
 		for d in colname:
 			fp=d.strip()
@@ -153,37 +154,34 @@ class Refine(object):
 		reversenamedict=dict(zip(namedict.values(), namedict.keys()))
 		for key1 in namedict.values():
 			for key2 in namedict.values():
-				diffcount=0
 				x=(key1, key1.replace(' ',''))
 				y=(key2, key2.replace(' ',''))
 				d=len(x[1])-len(y[1])
-				if d== -1:
+				if d== 1:
+					diffcount=0
 					adjustment=0
-					for i in range(len(x[1])):
-						if y[1][i]==x[1][i+adjustment]:
+					for i in range(len(y[1])):
+						if x[1][i]==y[1][i+adjustment]:
 							continue
 						else:
 							diffcount+=1
 							adjustment-=1
 							if diffcount>1:
 								break
-						if y[1][-1]!=x[1][-1]:
-							diffcount+=1
-					if x[-1]!=y[-1]:
+					if x[1][-1]!=y[1][-1]:
 						diffcount+=1		
 					if diffcount==1:
 						print "If you agree, I will merge the following: ", reversenamedict[x[0]], 'and ', reversenamedict[y[0]]
-					ri=raw_input("Type 'y' to agree, 'n' to disagree: ")
-					if ri=='y' or ri=='Y':
-						i=raw_input('Which name should be the one that is kept? Type 1 to keep the first name, or 2 to keep the second: ')
-						if i==1:
-							replacementdict=dict([(reversenamedict[x[0]], reversenamedict[y[0]])])
-							colname.update(replacementdict)
-						elif i==2:
-							replacementdict=dict([(reversenamedict[y[0]], reversenamedict[x[0]])])
-							colname.update(replacementdict)
-					else:
-						continue
+						ri=raw_input("Type 'y' to agree, 'n' to disagree: ")
+						if ri=='y' or ri=='Y':
+							i=raw_input('Which name should be the one that is kept? Type 1 to keep the first name, or 2 to keep the second: ')
+							if '1' in i:
+								replacementdict=dict([(reversenamedict[y[0]], reversenamedict[x[0]])])
+								colname.update(replacementdict)
+							elif '2' in i:
+								replacementdict=dict([(reversenamedict[x[0]], reversenamedict[y[0]])])
+								colname.update(replacementdict)
+
 	def save(self):
 		with open(self.csvfile, 'wb') as newcsv:
 			newwriter=csv.writer(newcsv, dialect=self.dialect, delimiter=self.delimiter, lineterminator = self.lineterminator,  quoting=csv.QUOTE_MINIMAL)
