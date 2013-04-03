@@ -5,14 +5,15 @@ import csv
 
 '''This class uses (and slightly expands) Open Refine's 'fingerprint' functionality to merge similar row names in a csv file on a per-column basis. 
 \nTo use this module:
-\n\nFirst you must create a class by typing (Your classname here)= Refine(your csvfilepath) with the optional arguments 'delimiter' and 'lineterminator' 
-to tell Python how to interpret the CSV.\nYou access individual columns by using 'classname.(columnname goes here)' syntax. 
+\n\nFirst you must create a class by typing *Your classname here*= Refine(*your csvfilepath*) with the optional additional arguments 'dialect', delimiter' and 'lineterminator' 
+to tell Python how to interpret the CSV.\nYou access individual columns by using *your classname*.(*columnname goes here*) syntax. 
 NOTE: This module assumes the first row is a row of columnnames! If you don't have any names, this won't work.
 If you want to standardize a column of names, you can run run classname.standardizenames(classname.columnname) and all identical names will be made to have
-with consistent formatting. If you just want to standardize words in a column, classname.standardizewords(classname.columnname) does the same thing for identical
-words. If you want to make things even more standardized, you can run classname.similarityfinder(classname.columnname) to have
-the program suggest words within one letter of similarity. You can either accept or reject these changes. Type the classname at any 
-time to see what your table looks like. When you are happy with the changes, save your changes directly to the file by typing 'classname.save()' '''
+with consistent formatting. If you set the optional parameter lastnamefirst=True, the names will be returned in 'Lastname, First, Middle' format.
+If you just want to standardize words in a column, classname.standardizewords(classname.columnname) does the same thing for identical
+words. If you want to make things even more standardized, you can then run classname.similarityfinder(classname.columnname) to have
+the program suggest words within one letter of similarity. You can either accept or reject these changes. Type the name of your class at any 
+time to see what your updated table looks like (Columns will be printed as rows for ease of scanning). When you are happy with the changes, save them directly to the file by typing classname.save() '''
 
 class Column(object):
 	def __init__(self, columnlist, order):
@@ -40,6 +41,9 @@ class Refine(object):
 		self.csvfile=csvfile
 		with open(csvfile, 'rb+') as csvobject:
 			creader=csv.reader(csvobject, dialect=dialect, delimiter=delimiter, lineterminator=lineterminator)
+			self.delimiter=delimiter
+			self.lineterminator=lineterminator
+			self.dialect=dialect
 			self.clist=[]
 			for row in creader:
 				self.clist.append(row)
@@ -116,7 +120,6 @@ class Refine(object):
 				key=[key[-1]+ ','] + key[:-1]
 				key=' '.join(key).title()
 				words=[(y, key) for y in x[1]]
-				print words
 				replacementitems.extend(words)
 			replacementdict=dict(replacementitems)
 			colname.update(replacementdict)
@@ -183,17 +186,13 @@ class Refine(object):
 						continue
 	def save(self):
 		with open(self.csvfile, 'wb') as newcsv:
-			newwriter=csv.writer(newcsv, dialect='excel', delimiter=',', lineterminator = '\r\n',  quoting=csv.QUOTE_MINIMAL)
+			newwriter=csv.writer(newcsv, dialect=self.dialect, delimiter=self.delimiter, lineterminator = self.lineterminator,  quoting=csv.QUOTE_MINIMAL)
 			columns=[]
 			newwriter.writerow(self.colnames)
 			for i, x in enumerate(self.colnames):
 				i= getattr(self, x)
 				columns.append(list(i))
-				print columns
 			for i in range(len(columns[0])):
 				row=[x[i] for x in columns]
 			for x in row:
 				newwriter.writerow(row)
-
-		
-
