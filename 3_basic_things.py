@@ -7,10 +7,12 @@ import random
 
 #Easily query API with requests module
 
-d= #api key here
+#dev key here
+d=
+
 
 def query_ADS(query):
-	d={'dev_key':d, 'q': query, 'rows': 10, 'fl':'title,author', 'sort': 'CITED asc'}
+	d={'dev_key': d, 'q': query, 'rows': 10, 'fl':'title,author', 'sort': 'CITED asc'}
 	response=requests.get( "http://adslabs.org/adsabs/api/search/", params=d)
 	print 'url: ', response.url, '\n'
 	jsonfiles=response.json()
@@ -19,7 +21,7 @@ def query_ADS(query):
 	for i, x in enumerate(records):
 		print i,x 
 
-query_ADS('quasar')
+##query_ADS('quasar')
 		
 
 # Grab a blog post
@@ -29,7 +31,8 @@ def get_blog_text(link):
 	tree=lh.fromstring(r.text)
 	list_of_text= ["A GREAT BLOG BOST:  "]
 	list_of_text+=tree.xpath('string(/html/head/title)')
-	list_of_text+=tree.xpath('//p/text()|//p/a/text()')
+	list_of_text+=' '
+	list_of_text+=tree.xpath('//p/descendant-or-self::text()|//p//following-sibling::*//text()')
 	print list_of_text
 	text=''.join(list_of_text)
 	text=text.split()
@@ -37,10 +40,11 @@ def get_blog_text(link):
 	text=text.encode('utf-8')
 	return text[:4000]
 
-##print get_blog_text('http://altbibl.io/dst4l/visualization-for-analysis-and-storytelling/')
+print get_blog_text('http://altbibl.io/dst4l/visualization-for-analysis-and-storytelling/')
 
 #Make a baby spider with link depth of 1
-#trick sites into thinking you're a person (could get you into trouble so make sure this is not against the terms of the website)
+#trick sites into thinking you're a person 
+#(could get you into trouble so make sure this is not against the terms of the website)
 
 def get_and_follow_links(link):
 	sites={}
@@ -48,7 +52,7 @@ def get_and_follow_links(link):
 	# default header: 'User-Agent': 'python-requests/1.2.0'
 	r=requests.get(link, headers=headers)
 	tree=lh.fromstring(r.text)
-	list_of_text=tree.xpath('//p/text()|//p/a/text()')
+	list_of_text=tree.xpath('//p/descendant-or-self::text()|//p//following-sibling::*//text()')
 	text=''.join(list_of_text)
 	text=text.encode('utf-8')
 	sites[link]=text
@@ -56,7 +60,8 @@ def get_and_follow_links(link):
 	for l in links[10:15]:
 		r=requests.get(l, headers=headers)
 		tree=lh.fromstring(r.text)
-		list_of_text=tree.xpath('//p/text()|//p/a/text()')
+		list_of_text=tree.xpath('//p/descendant-or-self::text()|//p//following-sibling::*//text()')
+		#more basic: tree.xpath('//text()')
 		text=''.join(list_of_text)
 		text=text.split()
 		text=' '.join(text)
