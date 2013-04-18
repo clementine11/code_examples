@@ -40,7 +40,7 @@ def get_blog_text(link):
 ##print get_blog_text('http://altbibl.io/dst4l/visualization-for-analysis-and-storytelling/')
 
 #Make a baby spider with link depth of 1
-#trick sites into thinking you're a person (could get you into trouble)
+#trick sites into thinking you're a person (could get you into trouble so make sure this is not against the terms of the website)
 
 def get_and_follow_links(link):
 	sites={}
