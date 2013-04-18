@@ -7,8 +7,10 @@ import random
 
 #Easily query API with requests module
 
+d= #api key here
+
 def query_ADS(query):
-	d={'dev_key':'8IIQgx5DrWZBwr2o', 'q': query, 'rows': 10, 'fl':'title,author', 'sort': 'CITED asc'}
+	d={'dev_key':d, 'q': query, 'rows': 10, 'fl':'title,author', 'sort': 'CITED asc'}
 	response=requests.get( "http://adslabs.org/adsabs/api/search/", params=d)
 	print 'url: ', response.url, '\n'
 	jsonfiles=response.json()
