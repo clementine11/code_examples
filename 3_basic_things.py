@@ -27,7 +27,7 @@ def query_ADS(query, dev, base_url):
 		print i,x 
 
 #example of calling the function with the query 'quasar':
-query_ADS('quasar')
+query_ADS('quasar', [dev key goes here], 'http://adslabs.org/adsabs/api/search/')
 
 
 #here we scrape a single site with a generalized scraping pattern to get text
@@ -41,14 +41,9 @@ def get_blog_text(link):
 	# that requests just returned from our link
 	tree=lh.fromstring(r.text)
 	#using the xpath language to grab the title
-	list_of_text=tree.xpath('string(/html/head/title)')
-	list_of_text+=' '
-	#getting all text from website
-	#this will be kind of messy and grab stuff you don't want
-	list_of_text+= tree.xpath('//text()')
-	# for more precision, you might want to use this more complicated xpath instead:
-	#list_of_text+=tree.xpath('//p/descendant-or-self::text()|//p//following-sibling::*//text()')
-	text=''.join(list_of_text)
+	text=tree.xpath('string(/html/head/title)')
+	text+=' '
+	text+= tree.xpath('string(//body/*[not(self::script)])')
 	#the next 2 lines get rid of extra whitespace
 	text=text.split()
 	text=' '.join(text)
@@ -70,17 +65,21 @@ def get_and_follow_links(initial_link, num_of_returned_links):
 	r=requests.get(initial_link)
 	tree=lh.fromstring(r.text)
 	#using the more complicated xpath query shown in the second function
-	list_of_text=tree.xpath('//p/descendant-or-self::text()|//p//following-sibling::*//text()')
-	text=''.join(list_of_text)
+	text=tree.xpath('string(/html/head/title)')
+	text+='\n'
+	text+=tree.xpath('string(//body/*[not(self::script)])')
+	text=text.split()
+	text=' '.join(text)
 	#making sure your computer can render non-ascii characters by encoding in utf-8
 	text=text.encode('utf-8')
-	sites[link]=text
+	sites[initial_link]=text
 	links=tree.xpath('//a/@href')
-	for l in links[0:num_of_returned_links:
+	for l in links[0:num_of_returned_links]:
 		r=requests.get(l)
 		tree=lh.fromstring(r.text)
-		list_of_text=tree.xpath('//p/descendant-or-self::text()|//p//following-sibling::*//text()')
-		text=''.join(list_of_text)
+		text=tree.xpath('string(/html/head/title)')
+		text+='\n'
+		text+= tree.xpath('string(//body/*[not(self::script)])')
 		text=text.split()
 		text=' '.join(text)
 		text=text.encode('utf-8')
@@ -89,7 +88,7 @@ def get_and_follow_links(initial_link, num_of_returned_links):
 		time.sleep(random.randint(5,15))
 	for i, x in enumerate(sites.items()):
 		print i, x
-
 #example query
-links= get_and_follow_links('http://altbibl.io/dst4l/visualization-for-analysis-and-storytelling/')
+links= get_and_follow_links(
+'http://altbibl.io/dst4l/visualization-for-analysis-and-storytelling/', 3)
 
